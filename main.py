@@ -2,6 +2,8 @@ import bottle
 import os
 import random
 from collections import defaultdict
+from pypaths import astar
+import json
 
 @bottle.route('/static/<path:path>')
 def static(path):
@@ -13,19 +15,16 @@ def start():
     data = bottle.request.json
     game_id = data['game_id']
     board_width = data['width']
-    board_height = data['height']
-
-    head_url = '%s://%s/static/head.png' % (
-        bottle.request.urlparts.scheme,
-        bottle.request.urlparts.netloc
-    )
+    board_height = data
     
     start_settings = {
-        "name": "leo isn't allowed to name things anymore",
-        "color": "gold",
-        "head_type": "tongue",
-        "head_url": head_url,
-        "tail_type": "curled"
+        "name": "Leo isn't allowed to name things anymore",
+        "color": "#807d8b",
+        "secondary_color": "#d1ff02",
+        "head_type": "shades",
+        "taunt": "SEE YOU IN COURT!",
+        "head_url": "http://i.imgur.com/peDooSu.gif",
+        "tail_type": "regular"
     }
 
     return start_settings
@@ -59,6 +58,8 @@ def move():
         x, y = coords
         grid[x][y] = 2
         
+    head = snake['coords'][0]
+        
     # Simple macros for each direction
     c_north = [snake['coords'][0][0], snake['coords'][0][1] - 1]
     c_south = [snake['coords'][0][0], snake['coords'][0][1] + 1]
@@ -68,23 +69,48 @@ def move():
     #Check if a given coordiante is safe
     def coords_safe(coords):
         x, y = coords
+        if x < 0 or x > width-1: return False # Check if coordinate is inside horizontal bounds
+        if y < 0 or y > height-1: return False # Check if coordinate is inside vertical bounds
         if grid[x][y] not in [0,2]: return False # Check if coordinate matches a snake body
-        if x < 0 or x > width-2: return False # Check if coordinate is inside horizontal bounds
-        if y < 0 or y > height-2: return False # Check if coordinate is inside vertical bounds
         return True
+    
+    def find_neighbours(coord):
+        x, y = coord
+        neighbors = []
         
-    if coords_safe(c_north):
-        direction = "up"
-    elif coords_safe(c_south):
-        direction = "down"
-    elif coords_safe(c_east):
-        direction = "right"
+        if coords_safe([x-1, y]): neighbors.append((x-1, y))
+        if coords_safe([x, y-1]): neighbors.append((x, y-1))
+        if coords_safe([x+1, y]): neighbors.append((x+1, y))
+        if coords_safe([x, y+1]): neighbors.append((x, y+1))
+        
+        return neighbors
+    
+    finder = astar.pathfinder(neighbors=find_neighbours)
+    path = finder( (head[0], head[1]), (food[0][0], food[0][1]) )[1]
+    
+    if len(path) < 2:
+        if coords_safe(c_north):
+            direction = "up"
+        elif coords_safe(c_south):
+            direction = "down"
+        elif coords_safe(c_east):
+            direction = "right"
+        else:
+            direction = "left"
     else:
-        direction = "left"
+        next_coord = path[1]
+        if next_coord[1] < head[1]:
+            direction = "up"
+        elif next_coord[1] > head[1]:
+            direction = "down"
+        elif next_coord[0] > head[0]:
+            direction = "right"
+        else:
+            direction = "left"
 
     return {
         'move': direction,
-        'taunt': 'battlesnake-python!'
+        'taunt': 'SEE YOU IN COURT!'
     }
 
 
