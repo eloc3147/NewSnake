@@ -1,2 +1,2 @@
-# Pankek_the_snek
-Snake AI for Battlsnake 2017
+# Our new cool snake for 2018!
+Snake AI for Battlsnake 2018
