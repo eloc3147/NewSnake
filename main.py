@@ -11,6 +11,7 @@ YOU_BODY = 20
 SNAKE_HEAD = 11
 SNAKE_BODY = 10
 
+
 @bottle.route('/static/<path:path>')
 def static(path):
     return bottle.static_file(path, root='static/')
@@ -18,11 +19,8 @@ def static(path):
 
 @bottle.post('/start')
 def start():
-    data = bottle.request.json
-    game_id = data['game_id']
-    board_width = data['width']
-    board_height = data
-    
+    data = dict(bottle.request.json)
+
     start_settings = {
         "name": "Leo isn't allowed to name things anymore",
         "color": "#807d8b",
@@ -41,7 +39,7 @@ def move():
     data = dict(bottle.request.json)
     width = data['width']
     height = data['height']
-    grid = [[0 for x in range(width)] for y in range(height)] 
+    grid = [[0 for x in range(width)] for y in range(height)]
     snakes = data['snakes']['data']
     food = [ptoc(x) for x in data['food']['data']]
     snake = data['you']
