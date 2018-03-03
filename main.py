@@ -100,24 +100,34 @@ def move():
         return neighbors
 
     finder = astar.pathfinder(neighbors=find_neighbours)
-    path = finder((head[0], head[1]), (food[0][0], food[0][1]))[1]
 
-    if len(path) < 2:
-        if coords_safe(c_north, width, height, grid):
-            direction = "up"
-        elif coords_safe(c_south, width, height, grid):
-            direction = "down"
-        elif coords_safe(c_east, width, height, grid):
-            direction = "right"
-        else:
-            direction = "left"
-    else:
+    # Find nearest food
+    closest_food = None
+    for f in food:
+        p = finder((head[0], head[1]), (f[0], f[1]))
+        if(p and (closest_food is None or p[0] < len(closest_food))):
+            closest_food = p[1]
+
+    path = closest_food
+
+    if(len(path) > 1):
         next_coord = path[1]
         if next_coord[1] < head[1]:
             direction = "up"
         elif next_coord[1] > head[1]:
             direction = "down"
         elif next_coord[0] > head[0]:
+            direction = "right"
+        else:
+            direction = "left"
+
+    # Fallback to safe execution
+    if(not direction):
+        if coords_safe(c_north, width, height, grid):
+            direction = "up"
+        elif coords_safe(c_south, width, height, grid):
+            direction = "down"
+        elif coords_safe(c_east, width, height, grid):
             direction = "right"
         else:
             direction = "left"
