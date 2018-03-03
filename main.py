@@ -10,6 +10,7 @@ YOU_HEAD = 21
 YOU_BODY = 20
 SNAKE_HEAD = 11
 SNAKE_BODY = 10
+HEALTH_CUTOFF = 50
 
 
 @bottle.route('/static/<path:path>')
@@ -104,13 +105,26 @@ def move():
     # Find nearest food
     closest_food = None
     for f in food:
+        # Skip food if it's too close to the wall, unless we're desperate
+        if(snake['health'] >= HEALTH_CUTOFF and (
+           f[0] == 0 or
+           f[0] == width - 1 or
+           f[1] == 0 or
+           f[1] == height - 1)):
+            continue
         p = finder((head[0], head[1]), (f[0], f[1]))
+        # Skip if no path to food
+        if(p[0] is None):
+            continue
+        # Update best path if this path is better
         if(p and (closest_food is None or p[0] < len(closest_food))):
             closest_food = p[1]
 
     path = closest_food
 
-    if(len(path) > 1):
+    direction = ""
+
+    if(path is not None and len(path) > 1):
         next_coord = path[1]
         if next_coord[1] < head[1]:
             direction = "up"
