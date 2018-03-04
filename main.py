@@ -12,6 +12,20 @@ SNAKE_HEAD = 11
 SNAKE_BODY = 10
 HEALTH_CUTOFF = 50
 
+TAUNTS = [
+    "Bing is better with Microsoft Edge",
+    "Microsoft Edge is the faster, safer browser on Windows 10 and it is already installed on your PC",
+    "20.9%!",
+    "Bing it on!",
+    "I know Bing is great! I googled it! ",
+    "You’re missing Silverlight. Install it to run this content.",
+    "These updates help protect you in an online world",
+    "Formerly called Live Search!",
+    "STEVE BALLMER IS A GOD IN OUR MODERN SOCIETY",
+    "Try our little brother, Yahoo!"
+
+]
+
 
 @bottle.route('/static/<path:path>')
 def static(path):
@@ -22,17 +36,13 @@ def static(path):
 def start():
     data = dict(bottle.request.json)
 
-    start_settings = {
-        "name": "Leo isn't allowed to name things anymore",
-        "color": "#807d8b",
-        "secondary_color": "#d1ff02",
-        "head_type": "shades",
-        "taunt": "SEE YOU IN COURT!",
-        "head_url": "http://i.imgur.com/peDooSu.gif",
-        "tail_type": "regular"
+    return {
+        "color": "#008272",
+        "secondary_color": "#ffb900",
+        "head_type": "sand-worm",
+        "head_url": "https://i.imgur.com/ksMI3rJ.gif",
+        "tail_type": "freckled"
     }
-
-    return start_settings
 
 
 @bottle.post('/move')
@@ -146,10 +156,11 @@ def move():
         else:
             direction = "left"
 
-    return {
+    result = {
         'move': direction,
-        'taunt': 'SEE YOU IN COURT!'
+        'taunt': random.choice(TAUNTS)
     }
+    return result
 
 
 # Check if a given coordiante is safe
